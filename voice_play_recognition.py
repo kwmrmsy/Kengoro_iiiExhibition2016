@@ -9,24 +9,38 @@ import sys
 import time
 
 from rospeex_if import ROSpeexInterface
-from rospeex_msgs.msg import SpeechRecognitionResponse 
+from rospeex_msgs.msg import SpeechRecognitionResponse
+
+def ss_callback(msg):
+
+    return
 
 def callback(msg):
     print(msg)
-
-def subscriber_callback(msg):
-    str = msg.message
+    print('inside callback')
+#    cbstr = msg.message
+    cbstr = msg
     f = open('recognized_text.txt','w')
-    f.write(str)
+    f.write(cbstr)
     f.close()
+    sys.stdout.write('cbstr: ')
+    print(cbstr)
+    f = open(text_data,'r')
+    voice_data = f.read()
+    voice_data = voice_data.decode('utf-8')
+    sys.stdout.write('voice text:')
+    print(voice_data)
+    f.close()
+    interface.say(voice_data, language=language, engine='nict')
+    endflg = 1
 
 rospy.init_node("hoge")
-rospy.Subscriber('/sr_res', SpeechRecognitionResponse, subscriber_callback)
-
+# rospy.Subscriber('/sr_res', SpeechRecognitionResponse, subscriber_callback)
 interface = ROSpeexInterface()
 interface.init()
+
 interface.register_sr_response(callback)
-interface.register_ss_response(callback)
+interface.register_ss_response(ss_callback)
 #language = "en"
 language = 'ja'
 #voice_font = "nict(ja)"
@@ -34,25 +48,30 @@ text_data = 'recognized_text.txt'
 
 interface.set_spi_config(language=language, engine='nict')
 
+endflg = 0
+
+# def subscriber_callback(msg):
+#     str = msg.message
+#     f = open('recognized_text.txt','w')
+#     f.write(str)
+#     f.close()
+#     print("callback end")
+
+
+
 def recognize_speak(filename):
+    #speak original sound
+    interface.play_sound(filename)
 
     w = open(filename)
     voice_data = w.read()
-    print("recognize")    
-    interface.recognize(voice_data, language=language, engine='nict')  
+    print("before recognize")
+    interface.recognize(voice_data, language=language, engine='nict')
     w.close()
-    
-    time.sleep(1)   
 
-    f = open(text_data)
-    voice_data = f.read()
-    print("speak")
-    f.close()
-    interface.say(voice_data, language=language, engine='nict')
-    
     rospy.spin()
 
-        
+
 if __name__ == '__main__':
     try:
         argv = sys.argv
@@ -60,8 +79,6 @@ if __name__ == '__main__':
             print "no input files."
             sys.exit()
         filename = argv[1]
-        
-        interface.play_sound(filename)
         recognize_speak(filename)
 
         #print('check')
@@ -70,4 +87,3 @@ if __name__ == '__main__':
         sys.exit()
     except:
         pass
-
