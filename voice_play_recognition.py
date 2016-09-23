@@ -35,7 +35,6 @@ def callback(msg):
     endflg = 1
 
 rospy.init_node("hoge")
-# rospy.Subscriber('/sr_res', SpeechRecognitionResponse, subscriber_callback)
 interface = ROSpeexInterface()
 interface.init()
 
@@ -49,15 +48,6 @@ text_data = 'recognized_text.txt'
 interface.set_spi_config(language=language, engine='nict')
 
 endflg = 0
-
-# def subscriber_callback(msg):
-#     str = msg.message
-#     f = open('recognized_text.txt','w')
-#     f.write(str)
-#     f.close()
-#     print("callback end")
-
-
 
 def recognize_speak(filename):
     #speak original sound
